@@ -25,4 +25,11 @@ export class HeroService {
     this.messageService.add('HeroService: fetched heroes');
     return heroes;
   }
+
+  /* récupération d'un Hero en fonction de son id */
+  getHero(id: number): Observable<HeroI> {
+    const hero = HEROES.find( h => h.id === id)!;
+    this.messageService.add(`HeroService: fetched hero id=${id}`);
+    return of(hero);
+  }
 }

@@ -16,7 +16,7 @@ export class HeroesComponent implements OnInit {
   };*/
 
   /* ? car variable vide au départ. Valeur sur click */
-  selectedHero?: HeroI;
+  /*selectedHero?: HeroI;*/
   heroes: HeroI[] = [];
 
   constructor(private HeroService: HeroService,
@@ -24,10 +24,10 @@ export class HeroesComponent implements OnInit {
 
 
 
-  onSelect(hero:HeroI): void {
+  /*onSelect(hero:HeroI): void {
     this.selectedHero = hero;
     this.messageService.add(`HeroesComponent: Selected hero id=${hero.id}`);
-  }
+  }*/
 
 
   ngOnInit(): void {
