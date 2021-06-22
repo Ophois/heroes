@@ -3,6 +3,8 @@ import { HeroI } from './hero-i';
 import { HEROES } from './mock-heroes';
 import { Observable, of } from 'rxjs';
 import { MessageService } from './message.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { catchError, map, tap} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -16,20 +18,104 @@ import { MessageService } from './message.service';
    - supprimer une donnée */
 export class HeroService {
 
-  // injection du service message dans le service hero
-  constructor(private messageService: MessageService) { }
+  //url de l'api
+  private heroUrl = 'http://localhost:3000/heroes';
+  httpOptions = {
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+  };
+
+
+
+  // injection des services message + http dans le service hero
+  constructor(private messageService: MessageService,
+              private http: HttpClient) { }
 
   getHeroes(): Observable<HeroI[]> {
     //return HEROES;
-    const heroes = of(HEROES);
-    this.messageService.add('HeroService: fetched heroes');
-    return heroes;
+   // const heroes = of(HEROES);
+    //this.log('fetched heroes');
+   //return heroes;
+   return this.http.get<HeroI[]>(this.heroUrl)
+   .pipe(
+     tap( _ => this.log('fetched heroes')),
+     catchError(this.handleError<HeroI[]>('getHeroes', []))
+   );
   }
 
   /* récupération d'un Hero en fonction de son id */
   getHero(id: number): Observable<HeroI> {
-    const hero = HEROES.find( h => h.id === id)!;
-    this.messageService.add(`HeroService: fetched hero id=${id}`);
-    return of(hero);
+    //const hero = HEROES.find( h => h.id === id)!;
+    const url = `${this.heroUrl}/${id}`;
+   /* this.log(`fetched hero id=${id}`);
+    return of(hero);*/
+    return this.http.get<HeroI>(url)
+    .pipe(
+      tap(_ => this.log(`fetched hero id=${id}`)),
+      catchError(this.handleError<HeroI>(`getHero id=${id}`))
+    )
+  }
+
+  /* ajout d'un Hero dans l'API (méthode POST) */
+  addHero(hero: HeroI): Observable<HeroI> {
+    return this.http.post<HeroI>(this.heroUrl, hero, this.httpOptions)
+    .pipe(
+      tap((newHero: HeroI) => this.log(`added Hero w/ id=${newHero.id}`)),
+      catchError(this.handleError<HeroI>('addHero'))
+    );
+  }
+
+  /* mise à jour d'un Hero dans l'API (methode PUT) */
+  updateHero(hero: HeroI) : Observable<any> {
+    return this.http.put(`${this.heroUrl}/${hero.id}`, hero, this.httpOptions)
+    .pipe(
+      tap(_ => this.log(`updated hero id=${hero.id}`)),
+      catchError(this.handleError<any>('updateHero'))
+    );
+  }
+
+  /* rechercher un Hero en fonction du nom */
+  searchHero(term: string): Observable<HeroI[]> {
+    // si vide retourner tableau vide
+    if(!term.trim()) {
+      return of([]);
+    }
+    return this.http.get<HeroI[]>(`${this.heroUrl}/?q=${term}`)
+    .pipe(
+      // opérateur ternaire (condition ? vrai : faux)
+      tap(x => x.length ?
+        this.log(`found heroes matching "${term}"`) :
+        this.log(`no heroes matching "${term}"`)),
+      catchError(this.handleError<HeroI[]>('searchHeroes', []))
+    );
+  }
+
+
+  /* suppression d'un Hero dans l'API (méthode delete) */
+  deleteHero(id: number): Observable<HeroI> {
+    const url = `${this.heroUrl}/${id}`;
+    return this.http.delete<HeroI>(url, this.httpOptions)
+    .pipe(
+      tap(_ => this.log(`deleted hero id=${id}`)),
+      catchError(this.handleError<HeroI>('deleteHero'))
+    )
+  }
+
+  private log(msg: string) {
+    this.messageService.add(`HeroService: ${msg}`);
+  }
+
+  /**  gère une opération en échec et laisse l'application continuer
+   * @param operation - nom de l'opération en échec
+   * @param result - valeur optionnelle à retourner à l'observable
+   */
+  private handleError<T>(operation = 'operation', result?: T) {
+    return (error: any): Observable<T> => {
+      // affichage de l'erreur dans la console
+      console.log(error);
+      //log de l'erreur sur la page
+      this.log(`${operation} failed: ${error.message}`);
+      // on continue l'appli en retournant un résultat vide
+      return of(result as T);
+    }
   }
 }

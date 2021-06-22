@@ -28,6 +28,17 @@ export class HeroesComponent implements OnInit {
     this.selectedHero = hero;
     this.messageService.add(`HeroesComponent: Selected hero id=${hero.id}`);
   }*/
+  delete(hero: HeroI): void {
+    this.heroes = this.heroes.filter(h => h !== hero);
+    this.HeroService.deleteHero(hero.id).subscribe();
+  }
+
+  add(name: string) : void {
+    name = name.trim(); //suppression des espaces avant et après
+    if(!name) { return; }
+    this.HeroService.addHero({name} as HeroI)
+    .subscribe((hero) => { this.heroes.push(hero)});
+  }
 
 
   ngOnInit(): void {
