@@ -10,6 +10,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { HeroSearchComponent } from './hero-search/hero-search.component';
 import { NavComponent } from './nav/nav.component';
+import { HeaderComponent } from './header/header.component';
+import { FooterComponent } from './footer/footer.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +22,8 @@ import { NavComponent } from './nav/nav.component';
     DashboardComponent,
     HeroSearchComponent,
     NavComponent,
+    HeaderComponent,
+    FooterComponent,
   ],
   imports: [
     BrowserModule,
