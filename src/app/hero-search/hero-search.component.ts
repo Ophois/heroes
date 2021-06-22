@@ -32,5 +32,5 @@ export class HeroSearchComponent implements OnInit {
       switchMap((term: string) => this.heroService.searchHero(term)),
     );
   }
-
+  //https://github.com/Ophois/heroes.git
 }
